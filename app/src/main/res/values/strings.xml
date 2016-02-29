@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Thermostat</string>
+    <string name="action_settings">Settings</string>
+</resources>
