@@ -7,17 +7,19 @@ public class ThermostatStatus {
     private final int id;
     private final int temp;
     private final int date;
-    private final int coolSetPoint;
-    private final int heatSetPoint;
+    private final int setPoint;
     private final boolean heatOn;
     private final boolean coolOn;
 
-    public ThermostatStatus(int id, int temp, int date, int coolSetPoint, boolean coolOn, int heatSetPoint, boolean heatOn) {
+    static final String HEATING = "HEATING";
+    static final String COOLING = "COOLING";
+    static final String HOLDING = "HOLDING";
+
+    public ThermostatStatus(int id, int temp, int date, int setPoint, boolean coolOn, boolean heatOn) {
         this.id = id;
         this.temp = temp;
         this.date = date;
-        this.coolSetPoint = coolSetPoint;
-        this.heatSetPoint = heatSetPoint;
+        this.setPoint = setPoint;
         this.heatOn = heatOn;
         this.coolOn = coolOn;
     }
@@ -34,14 +36,6 @@ public class ThermostatStatus {
         return temp;
     }
 
-    public int getHeatSetPoint() {
-        return heatSetPoint;
-    }
-
-    public int getCoolSetPoint() {
-        return coolSetPoint;
-    }
-
     public boolean isCoolOn() {
         return coolOn;
     }
@@ -49,6 +43,10 @@ public class ThermostatStatus {
     public boolean isHeatOn() {
 
         return heatOn;
+    }
+
+    public int getSetPoint() {
+        return setPoint;
     }
 }
 

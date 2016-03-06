@@ -25,9 +25,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAlignment="center"
-        android:text="Holding"
+        android:text="HOLDING"
+        android:fontFamily="@string/fontFamily__roboto_black"
         android:textSize="18sp"
-        android:paddingBottom="30dp"/>
+        android:paddingBottom="30dp"
+        android:id="@+id/status_string"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -38,7 +40,7 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/set_temp_cool"
+            android:id="@+id/set_temp"
             android:orientation="horizontal">
 
             <LinearLayout
@@ -49,11 +51,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_keyboard_arrow_up_24dp"
-                    android:id="@+id/cool_up"/>
+                    android:id="@+id/up"
+                    android:onClick="changeSetTemp"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:id="@+id/set_temp_cool_value"
+                    android:id="@+id/set_temp_value"
                     android:textSize="60sp"
                     android:text="75"
                     android:textAlignment="center"/>
@@ -61,7 +64,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_keyboard_arrow_down_24dp"
-                    android:id="@+id/cool_down"/>
+                    android:id="@+id/down"
+                    android:onClick="changeSetTemp"/>
             </LinearLayout>
         </LinearLayout>
 
