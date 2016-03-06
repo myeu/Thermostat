@@ -6,11 +6,10 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +19,7 @@ public class Thermostat extends AppCompatActivity {
     List<ThermostatStatus> states;
     ThermostatStatus status;
     SetPoint setPoint;
+    String endPointURL = "http://52.37.144.142:9000/application";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,26 +80,55 @@ public class Thermostat extends AppCompatActivity {
         }
     }
 
-    public void changeSetTemp(View view) {
-        int id = view.getId();
+    public synchronized void changeSetTemp(View view) {
+        long timeId = System.currentTimeMillis();
 
-        if (id == R.id.up) {
+        int viewId = view.getId();
+
+        if (viewId == R.id.up) {
             setPoint.up();
-        } else if (id == R.id.down) {
+        } else if (viewId == R.id.down) {
             setPoint.down();
         }
+        Log.d("getTemperature", "" + setPoint.getTemperature());
 
         TextView setPointView = (TextView) findViewById(R.id.set_temp_value);
+        setPointView.setText("" + setPoint.getTemperature());
+
+        updateServerSetTemp(timeId, setPoint.getTemperature());
+    }
+
+    public void updateServerSetTemp(long id, int temp) {
 
         JSONObject manualUpdate = new JSONObject();
-        try {
-            manualUpdate.put("setPoint", "" + setPoint.getTemperature());
-            Log.d("JSON", manualUpdate.toString());
-            setPointView.setText("" + setPoint.getTemperature());
-        } catch (JSONException e) {
-            e.printStackTrace();
+        manualUpdate.put("Id", "" + id);
+        manualUpdate.put("setPoint", "" + temp);
+        Log.d("JSON", manualUpdate.toString());
+
+        RequestRunnable rr = new RequestRunnable(endPointURL, manualUpdate);
+        Thread t = new Thread(rr);
+        t.start();
+    }
+
+    private static class RequestRunnable implements Runnable{
+
+        JSONObject obj;
+        String endPointURL;
+
+        public RequestRunnable(String endPointURL, JSONObject obj) {
+            this.obj = obj;
+            this.endPointURL = endPointURL;
         }
 
+        @Override
+        public void run() {
+            Request request = new Request();
+            JSONObject posted = request.postRequest(endPointURL, obj);
+
+            if (posted != null) {
+                Log.d("POST", posted.toString());
+            }
+        }
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.group4.thermostat;
 
 /**
- * Created by marisayeung on 3/6/16.
+ * Created by marisayeung
  */
 public class SetPoint {
     int temperature;
