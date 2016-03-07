@@ -4,24 +4,30 @@ package com.group4.thermostat;
  * Created by marisayeung on 2/29/16.
  */
 public class ThermostatStatus {
-    private final int id;
-    private final int temp;
-    private final int date;
-    private final int setPoint;
-    private final boolean heatOn;
-    private final boolean coolOn;
+    private int id;
+    private int temp;
+    private int date;
+    private int setPoint;
+    private boolean heatOn;
+    private boolean coolOn;
+    private int mode;
 
     static final String HEATING = "HEATING";
     static final String COOLING = "COOLING";
     static final String HOLDING = "HOLDING";
 
-    public ThermostatStatus(int id, int temp, int date, int setPoint, boolean coolOn, boolean heatOn) {
+    static final int HEATMODE = 0;
+    static final int COOLMODE = 1;
+    static final int OFFMODE = 2;
+
+    public ThermostatStatus(int id, int temp, int date, int setPoint, boolean coolOn, boolean heatOn, int mode) {
         this.id = id;
         this.temp = temp;
         this.date = date;
         this.setPoint = setPoint;
         this.heatOn = heatOn;
         this.coolOn = coolOn;
+        this.mode = mode;
     }
 
     public int getId() {
@@ -47,6 +53,14 @@ public class ThermostatStatus {
 
     public int getSetPoint() {
         return setPoint;
+    }
+
+    public int getMode() {
+        return mode;
+    }
+
+    public void setMode(int mode) {
+        this.mode = mode;
     }
 }
 

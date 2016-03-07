@@ -17,4 +17,9 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="offTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:textColor">@color/colorDisabledText</item>
+        <item name="android:textColorSecondary">@color/colorSecondaryText</item>
+    </style>
+
 </resources>

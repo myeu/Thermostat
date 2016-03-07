@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">Thermostat</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_uninstall">Uninstall</string>
     <string name="action_schedule">Schedule</string>
     <string name="title_activity_schedule">Schedule</string>
+    <string name="heat_mode">Heat</string>
+    <string name="cool_mode">Cool</string>
+    <string name="off_mode">Off</string>
+    <string name="end_point_url">http://52.37.144.142:9000/application</string>
 </resources>

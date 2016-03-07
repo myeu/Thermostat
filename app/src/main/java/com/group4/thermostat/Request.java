@@ -1,7 +1,5 @@
 package com.group4.thermostat;
 
-import android.util.Log;
-
 import java.net.URL;
 import java.net.HttpURLConnection;
 
