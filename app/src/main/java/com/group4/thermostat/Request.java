@@ -1,5 +1,7 @@
 package com.group4.thermostat;
 
+import android.util.Log;
+
 import java.net.URL;
 import java.net.HttpURLConnection;
 
@@ -35,6 +37,7 @@ public class Request {
         } catch(IOException e) {
             System.out.println("issue establishing connection with " +
                     endPointURL);
+            e.printStackTrace();
             return null;
         }
 
@@ -159,7 +162,7 @@ public class Request {
         // urlString is the server endpoint. i have configured the
         // server to receive both get and post requests at the same
         // url.
-        String urlString = "http://52.37.144.142:9000/thermostat";
+        String urlString = "http://52.37.144.142:9000/application";
         // the urlString for the app is "http://52.37.144.142:9000/application"
         JSONObject obj = r.getRequest(urlString);
 

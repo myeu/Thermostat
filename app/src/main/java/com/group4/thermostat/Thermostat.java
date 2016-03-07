@@ -1,4 +1,5 @@
 package com.group4.thermostat;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -9,7 +10,6 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,12 +106,10 @@ public class Thermostat extends AppCompatActivity {
         Log.d("JSON", manualUpdate.toString());
 
         RequestRunnable rr = new RequestRunnable(endPointURL, manualUpdate);
-        Thread t = new Thread(rr);
-        t.start();
+        rr.execute();
     }
 
-    private static class RequestRunnable implements Runnable{
-
+    class RequestRunnable extends AsyncTask<Void,Void,Void> {
         JSONObject obj;
         String endPointURL;
 
@@ -121,13 +119,13 @@ public class Thermostat extends AppCompatActivity {
         }
 
         @Override
-        public void run() {
+        protected Void doInBackground(Void... params) {
             Request request = new Request();
             JSONObject posted = request.postRequest(endPointURL, obj);
-
             if (posted != null) {
                 Log.d("POST", posted.toString());
             }
+            return null;
         }
     }
 
