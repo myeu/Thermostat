@@ -1,12 +1,14 @@
 package com.group4.thermostat;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -14,6 +16,8 @@ import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Thermostat extends AppCompatActivity {
 
@@ -22,7 +26,91 @@ public class Thermostat extends AppCompatActivity {
     SetPoint setPoint;
     String setTempURL = "http://52.37.144.142:9000/setTemperature";
     String getStatusURL = "http://52.37.144.142:9000/application";
-//    List<Integer> textViewIds = Arrays.asList(R.id.current_temp, R.id.status_string, R.id.set_temp_value);
+
+    TextView temperature, setTemp, statusString;
+    ImageView modeIcon;
+
+    Timer timer;
+
+    class fetchThermostatStatus extends TimerTask {
+        @Override
+        public void run () {
+            RequestRunnable rr = new RequestRunnable(getStatusURL, RequestRunnable.GET);
+            rr.execute();
+//            Thermostat.this.runOnUiThread(new Runnable() {
+//
+//                @Override
+//                public void run() {
+//                    changeState(status);
+//                }
+//            });
+        }
+
+        /*public void run() {
+            Thermostat.this.runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+                    Request request = new Request();
+                    JSONObject statusJson = request.getRequest(getStatusURL);
+
+                    if (statusJson != null) {
+                        status.updateThermostatStatus(statusJson);
+                        changeState(status);
+                        Log.d("GET", statusJson.toString());
+                    } else {
+                        Log.d("GET", "GET was null");
+                    }
+                }
+            });
+        }*/
+    }
+
+    class RequestRunnable extends AsyncTask<Void,Void,Void> {
+        JSONObject obj;
+        String endPointURL;
+        String requestType;
+        static final String GET = "get";
+        static final String POST = "post";
+
+        public RequestRunnable(String endPointURL, JSONObject obj, String requestType) {
+            this.obj = obj;
+            this.endPointURL = endPointURL;
+            this.requestType = requestType;
+        }
+
+        public RequestRunnable(String endPointURL, String requestType) {
+            this.endPointURL = endPointURL;
+            this.requestType = requestType;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            Request request = new Request();
+
+            if (requestType.equals(POST)) {
+                JSONObject posted = request.postRequest(endPointURL, obj);
+                Log.d("POST", posted.toString());
+            }
+            else if (requestType.equals(GET)) {
+                JSONObject statusJson = request.getRequest(endPointURL);
+                if (statusJson != null) {
+                    status.updateThermostatStatus(statusJson);
+//                    changeState(status);
+                    Log.d("GET", statusJson.toString());
+                } else {
+                    Log.d("GET", "GET was null");
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            changeState(status);
+            super.onPostExecute(aVoid);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +124,7 @@ public class Thermostat extends AppCompatActivity {
         status = status1;
         setPoint = new SetPoint(0, status1.getSetPoint());
         Log.d("STATUS", "status created");
-        getState(getStatusURL, true);
+        getState(getStatusURL);
 //        Request r = new Request();
 //        JSONObject statusJson = r.getRequest(getStatusURL);
 //        Log.d("GET", statusJson.toString());
@@ -56,6 +144,12 @@ public class Thermostat extends AppCompatActivity {
         states.add(status4);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+//        timerHandler.postDelayed(timerRunnable, 0);
+    }
+
     public void chooseState(View view) {
         switch (view.getId()) {
             case R.id.state_1:
@@ -73,26 +167,35 @@ public class Thermostat extends AppCompatActivity {
     }
 
     public void fetchUpdate(View view) {
-        getState(getStatusURL, false);
-        changeState(status);
+        Button b = (Button) view;
+        if (b.getText().equals("stop updating")) {
+            timer.cancel();
+            timer.purge();
+            b.setText("start updating");
+        } else {
+            timer = new Timer();
+            timer.schedule(new fetchThermostatStatus(), 0, 1000);
+            b.setText("stop updating");
+        }
     }
 
-    public void getState(String url, boolean loop) {
-        RequestRunnable rr = new RequestRunnable(url, RequestRunnable.GET, loop);
+    public void getState(String url) {
+        RequestRunnable rr = new RequestRunnable(url, RequestRunnable.GET);
         rr.execute();
     }
+
 // TODO: get last setpoint from server upon login
     public void changeState(ThermostatStatus status) {
 //        Current temp
-        TextView temp = (TextView) findViewById(R.id.current_temp);
-        temp.setText(status.getTemp() + "");
+        temperature = (TextView) findViewById(R.id.current_temp);
+        temperature.setText(status.getTemp() + "");
 
 //        Set temp
-        TextView setTemp = (TextView) findViewById(R.id.set_temp_value);
+        setTemp = (TextView) findViewById(R.id.set_temp_value);
         setTemp.setText(setPoint.getTemperature() + "");
 
 //        Status of HVAC
-        TextView statusString = (TextView) findViewById(R.id.status_string);
+        statusString = (TextView) findViewById(R.id.status_string);
         if (status.isCoolOn()) {
             statusString.setText(ThermostatStatus.COOLING);
             statusString.setTextColor(getResources().getColor(R.color.cool));
@@ -108,7 +211,7 @@ public class Thermostat extends AppCompatActivity {
         }
 
 //        Enabled?
-        ImageView modeIcon = (ImageView) findViewById(R.id.mode);
+        modeIcon = (ImageView) findViewById(R.id.mode);
         switch (status.getMode()) {
             case ThermostatStatus.HEATMODE:
                 disableText(false);
@@ -174,54 +277,6 @@ public class Thermostat extends AppCompatActivity {
 
         RequestRunnable rr = new RequestRunnable(setTempURL, manualUpdate, RequestRunnable.POST);
         rr.execute();
-    }
-
-    class RequestRunnable extends AsyncTask<Void,Void,Void> {
-        JSONObject obj;
-        String endPointURL;
-        String requestType;
-        static final String GET = "get";
-        static final String POST = "post";
-        boolean loop = false;
-
-        public RequestRunnable(String endPointURL, JSONObject obj, String requestType) {
-            this.obj = obj;
-            this.endPointURL = endPointURL;
-            this.requestType = requestType;
-        }
-
-        public RequestRunnable(String endPointURL, String requestType, boolean loop) {
-            this.endPointURL = endPointURL;
-            this.requestType = requestType;
-            this.loop = loop;
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            Request request = new Request();
-
-            if (requestType.equals(POST)) {
-                JSONObject posted = request.postRequest(endPointURL, obj);
-                Log.d("POST", posted.toString());
-            }
-            else if (requestType.equals(GET)) {
-                JSONObject statusJson = request.getRequest(endPointURL);
-                if (statusJson != null) {
-                    status.updateThermostatStatus(statusJson);
-//                    changeState(status);
-                    Log.d("GET", statusJson.toString());
-                } else {
-                    Log.d("GET", "GET was null");
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            changeState(status);
-            super.onPostExecute(aVoid);
-        }
     }
 
 //    TODO: make sure this runs after initial status GET request
