@@ -2,7 +2,6 @@ package com.group4.thermostat;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -11,11 +10,13 @@ import android.view.MenuItem;
 import org.json.simple.JSONObject;
 
 /**
- * Created by marisayeung on 3/6/16.
+ * Created by marisayeung
+ * TODO: update gui with new selection
  */
 public class MenuHelper {
 
-    static String endPointURL = "http://52.37.144.142:9000/application";
+//    TODO: get from string.xml if possible
+    static String endPointURL = "http://52.37.144.142:9000/setMode";
     ThermostatStatus status;
 
     public static boolean handleOnItemSelected(Context context, MenuItem item, ThermostatStatus status) {

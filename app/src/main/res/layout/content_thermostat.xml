@@ -30,14 +30,12 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/current_temp"
                 android:textSize="130sp"
-                android:text="70"
                 android:textAlignment="center"
                 android:textColor="@color/colorPrimaryText"/>
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
-                android:text="HOLDING"
                 android:fontFamily="@string/fontFamily__roboto_black"
                 android:textSize="18sp"
                 android:paddingBottom="30dp"
@@ -70,7 +68,6 @@
                             android:layout_height="match_parent"
                             android:id="@+id/set_temp_value"
                             android:textSize="60sp"
-                            android:text="75"
                             android:textAlignment="center"/>
                         <ImageButton
                             android:layout_width="match_parent"
@@ -89,32 +86,11 @@
                 android:paddingTop="30dp"
                 android:gravity="center">
                 <Button
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="State 1"
+                    android:text="Update"
                     android:id="@+id/state_1"
-                    android:onClick="chooseState"/>
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="State 2"
-                    android:id="@+id/state_2"
-                    android:onClick="chooseState"/>
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="State 3"
-                    android:id="@+id/state_3"
-                    android:onClick="chooseState"/>
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="State 4"
-                    android:id="@+id/state_4"
-                    android:onClick="chooseState"/>
-
-
-
+                    android:onClick="fetchUpdate"/>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

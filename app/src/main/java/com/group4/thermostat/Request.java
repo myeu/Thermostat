@@ -1,5 +1,7 @@
 package com.group4.thermostat;
 
+import android.util.Log;
+
 import java.net.URL;
 import java.net.HttpURLConnection;
 
@@ -30,7 +32,9 @@ public class Request {
             connection = (HttpURLConnection)url.openConnection();
             connection.setRequestMethod(requestMethod);
             connection.setRequestProperty("Content-Type", "application/json");
-            connection.setDoOutput(true);
+            if(requestMethod == "POST") {
+                connection.setDoOutput(true);
+            }
             connection.connect();
         } catch(IOException e) {
             System.out.println("issue establishing connection with " +
@@ -50,16 +54,21 @@ public class Request {
 
     public JSONObject getRequest(String endPointURL) {
 
+        Log.d("GET", "Request handling the get");
+
         HttpURLConnection connection = getConnection(endPointURL, "GET");
 
         if(connection == null) {
+            Log.d("GET", "Connection is null");
             // check endPointURL
             return null;
         }
 
         try {
+            Log.d("GETINPUTSTREAM", "about to try");
             BufferedReader br =
                     new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            Log.d("GETINPUTSTREAM", "got here");
             StringBuilder sb = new StringBuilder();
             String line;
 
@@ -69,8 +78,11 @@ public class Request {
 
             br.close();
 
+            Log.d("GET", "about to return");
             return getJSONObject(sb.toString());
-        } catch(IOException e) {
+        } catch(Exception e) {
+            Log.d("GET", "IOException");
+            e.printStackTrace();
             return null;
         }
 
