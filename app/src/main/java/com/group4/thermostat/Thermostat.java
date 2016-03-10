@@ -29,41 +29,16 @@ public class Thermostat extends AppCompatActivity {
 
     TextView temperature, setTemp, statusString;
     ImageView modeIcon;
+    Button b;
 
     Timer timer;
 
     class fetchThermostatStatus extends TimerTask {
         @Override
         public void run () {
-            RequestRunnable rr = new RequestRunnable(getStatusURL, RequestRunnable.GET);
-            rr.execute();
-//            Thermostat.this.runOnUiThread(new Runnable() {
-//
-//                @Override
-//                public void run() {
-//                    changeState(status);
-//                }
-//            });
+            Log.d("FETCH", "" + android.os.Process.myTid());
+            getState(getStatusURL);
         }
-
-        /*public void run() {
-            Thermostat.this.runOnUiThread(new Runnable() {
-
-                @Override
-                public void run() {
-                    Request request = new Request();
-                    JSONObject statusJson = request.getRequest(getStatusURL);
-
-                    if (statusJson != null) {
-                        status.updateThermostatStatus(statusJson);
-                        changeState(status);
-                        Log.d("GET", statusJson.toString());
-                    } else {
-                        Log.d("GET", "GET was null");
-                    }
-                }
-            });
-        }*/
     }
 
     class RequestRunnable extends AsyncTask<Void,Void,Void> {
@@ -96,8 +71,8 @@ public class Thermostat extends AppCompatActivity {
                 JSONObject statusJson = request.getRequest(endPointURL);
                 if (statusJson != null) {
                     status.updateThermostatStatus(statusJson);
-//                    changeState(status);
-                    Log.d("GET", statusJson.toString());
+//                    Log.d("GET", statusJson.toString());
+                    Log.d("GET", "" + android.os.Process.myTid());
                 } else {
                     Log.d("GET", "GET was null");
                 }
@@ -119,16 +94,13 @@ public class Thermostat extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        b = (Button) findViewById(R.id.update);
+
         // Get status
         ThermostatStatus status1 = new ThermostatStatus(1, 73, 1, 70, false, false, ThermostatStatus.HEATMODE);
         status = status1;
         setPoint = new SetPoint(0, status1.getSetPoint());
-        Log.d("STATUS", "status created");
         getState(getStatusURL);
-//        Request r = new Request();
-//        JSONObject statusJson = r.getRequest(getStatusURL);
-//        Log.d("GET", statusJson.toString());
-//        status.updateThermostatStatus(statusJson);
         changeState(status);
 
         // Test status changes via UI
@@ -147,7 +119,17 @@ public class Thermostat extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-//        timerHandler.postDelayed(timerRunnable, 0);
+        timer = new Timer();
+        timer.schedule(new fetchThermostatStatus(), 0, 1000);
+        b.setText("pause updating");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        timer.cancel();
+        timer.purge();
+        b.setText("start updating");
     }
 
     public void chooseState(View view) {
@@ -167,15 +149,15 @@ public class Thermostat extends AppCompatActivity {
     }
 
     public void fetchUpdate(View view) {
-        Button b = (Button) view;
-        if (b.getText().equals("stop updating")) {
+        b = (Button) view;
+        if (b.getText().equals("pause updating")) {
             timer.cancel();
             timer.purge();
             b.setText("start updating");
         } else {
             timer = new Timer();
             timer.schedule(new fetchThermostatStatus(), 0, 1000);
-            b.setText("stop updating");
+            b.setText("pause updating");
         }
     }
 
@@ -199,15 +181,15 @@ public class Thermostat extends AppCompatActivity {
         if (status.isCoolOn()) {
             statusString.setText(ThermostatStatus.COOLING);
             statusString.setTextColor(getResources().getColor(R.color.cool));
-            Log.d("COOLING", "here");
+            Log.d("COOLING", "cooling");
         } else if (status.isHeatOn()) {
             statusString.setText(ThermostatStatus.HEATING);
             statusString.setTextColor(getResources().getColor(R.color.heat));
-            Log.d("HEATING", "set status string here");
+            Log.d("HEATING", "heating");
         } else if (!status.isHeatOn() && !status.isCoolOn()){
             statusString.setText(ThermostatStatus.HOLDING);
             statusString.setTextColor(getResources().getColor(R.color.colorSecondaryText));
-            Log.d("HOLDING", "here");
+            Log.d("HOLDING", "holding");
         }
 
 //        Enabled?
@@ -273,7 +255,7 @@ public class Thermostat extends AppCompatActivity {
         JSONObject manualUpdate = new JSONObject();
         manualUpdate.put("Id", "" + id);
         manualUpdate.put("setTemp", "" + temp);
-        Log.d("JSON", manualUpdate.toString());
+//        Log.d("JSON", manualUpdate.toString());
 
         RequestRunnable rr = new RequestRunnable(setTempURL, manualUpdate, RequestRunnable.POST);
         rr.execute();

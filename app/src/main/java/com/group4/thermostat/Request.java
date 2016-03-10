@@ -54,7 +54,7 @@ public class Request {
 
     public JSONObject getRequest(String endPointURL) {
 
-        Log.d("GET", "Request handling the get");
+//        Log.d("GET", "Request handling the get");
 
         HttpURLConnection connection = getConnection(endPointURL, "GET");
 
@@ -65,10 +65,8 @@ public class Request {
         }
 
         try {
-            Log.d("GETINPUTSTREAM", "about to try");
             BufferedReader br =
                     new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            Log.d("GETINPUTSTREAM", "got here");
             StringBuilder sb = new StringBuilder();
             String line;
 
@@ -77,9 +75,8 @@ public class Request {
             }
 
             br.close();
-
-            Log.d("GET", "about to return");
             return getJSONObject(sb.toString());
+
         } catch(Exception e) {
             Log.d("GET", "IOException");
             e.printStackTrace();
