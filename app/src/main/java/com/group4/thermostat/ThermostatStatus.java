@@ -1,5 +1,7 @@
 package com.group4.thermostat;
 
+import android.util.Log;
+
 import org.json.simple.JSONObject;
 
 /**
@@ -34,6 +36,25 @@ public class ThermostatStatus {
         this.mode = mode;
         lastReceivedId = 0;
     }
+
+    public ThermostatStatus(JSONObject thermostatData, JSONObject appData) {
+        updateThermostatStatus(thermostatData);
+        updateAppData(appData);
+        Log.d("tData", thermostatData.toString());
+        Log.d("aData", appData.toString());
+        Log.d("Data", "Status created");
+    }
+
+//    {
+//      "mode":"2",
+//      "Id":"1457511426899",
+//      "status":"ok",
+//      "setTemp":"70"
+//     }
+    private void updateAppData(JSONObject appData) {
+        this.mode = Integer.parseInt(appData.get("mode").toString());
+        this.setPoint = Integer.parseInt(appData.get("setTemp").toString());
+     }
 
     public int getId() {
         return id;
@@ -95,6 +116,14 @@ public class ThermostatStatus {
 
             lastReceivedId = id;
         }
+    }
+
+    public void up() {
+        setPoint += 1;
+    }
+
+    public void down() {
+        setPoint -= 1;
     }
 }
 

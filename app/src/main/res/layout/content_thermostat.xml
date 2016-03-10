@@ -20,18 +20,34 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/loading"
+                android:id="@+id/loading"
+                android:textSize="40sp"/>
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:minHeight="40dip"
+                android:maxHeight="40dip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"/>
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/mode"
-                android:layout_gravity="center"/>
+                android:layout_gravity="center"
+                android:visibility="invisible"/>
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/current_temp"
                 android:textSize="130sp"
                 android:textAlignment="center"
-                android:textColor="@color/colorPrimaryText"/>
+                android:textColor="@color/colorPrimaryText"
+                android:visibility="invisible"/>
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -39,7 +55,8 @@
                 android:fontFamily="@string/fontFamily__roboto_black"
                 android:textSize="18sp"
                 android:paddingBottom="30dp"
-                android:id="@+id/status_string"/>
+                android:id="@+id/status_string"
+                android:visibility="invisible"/>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -62,19 +79,22 @@
                             android:layout_height="wrap_content"
                             android:src="@drawable/ic_keyboard_arrow_up_24dp"
                             android:id="@+id/up"
-                            android:onClick="changeSetTemp"/>
+                            android:onClick="changeSetTemp"
+                            android:visibility="invisible"/>
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:id="@+id/set_temp_value"
                             android:textSize="60sp"
-                            android:textAlignment="center"/>
+                            android:textAlignment="center"
+                            android:visibility="invisible"/>
                         <ImageButton
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:src="@drawable/ic_keyboard_arrow_down_24dp"
                             android:id="@+id/down"
-                            android:onClick="changeSetTemp"/>
+                            android:onClick="changeSetTemp"
+                            android:visibility="invisible"/>
                     </LinearLayout>
                 </LinearLayout>
 
@@ -90,7 +110,8 @@
                     android:layout_height="wrap_content"
                     android:text="Update"
                     android:id="@+id/update"
-                    android:onClick="fetchUpdate"/>
+                    android:onClick="fetchUpdate"
+                    android:visibility="invisible"/>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

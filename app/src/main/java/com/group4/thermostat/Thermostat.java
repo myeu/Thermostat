@@ -1,7 +1,6 @@
 package com.group4.thermostat;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -9,12 +8,13 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.json.simple.JSONObject;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -23,13 +23,15 @@ public class Thermostat extends AppCompatActivity {
 
     List<ThermostatStatus> states;
     ThermostatStatus status;
-    SetPoint setPoint;
     String setTempURL = "http://52.37.144.142:9000/setTemperature";
     String getStatusURL = "http://52.37.144.142:9000/application";
+    String getPastStateURL = "http://52.37.144.142:9000/thermostat";
 
-    TextView temperature, setTemp, statusString;
+    TextView temperature, setTemp, statusString, loading;
     ImageView modeIcon;
     Button b;
+    ImageButton up, down;
+    ProgressBar progressBar;
 
     Timer timer;
 
@@ -38,6 +40,36 @@ public class Thermostat extends AppCompatActivity {
         public void run () {
             Log.d("FETCH", "" + android.os.Process.myTid());
             getState(getStatusURL);
+        }
+    }
+
+    class InitRequestRunnable extends AsyncTask<Void,Void,Void> {
+        Request request1 = new Request();
+        Request request2 = new Request();
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            JSONObject thermostatStatusJson = request1.getRequest(getStatusURL);
+            JSONObject appStatusJson = request2.getRequest(getPastStateURL);
+            if (thermostatStatusJson != null && appStatusJson != null) {
+                status = new ThermostatStatus(thermostatStatusJson, appStatusJson);
+            } else {
+                Log.d("GET", "GET was null");
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            initializeLayout();
+            changeState(status);
+            invalidateOptionsMenu();
         }
     }
 
@@ -94,26 +126,37 @@ public class Thermostat extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        modeIcon = (ImageView) findViewById(R.id.mode);
+        temperature = (TextView) findViewById(R.id.current_temp);
+        setTemp = (TextView) findViewById(R.id.set_temp_value);
+        statusString = (TextView) findViewById(R.id.status_string);
+        up = (ImageButton) findViewById(R.id.up);
+        down = (ImageButton) findViewById(R.id.down);
         b = (Button) findViewById(R.id.update);
 
+        loading = (TextView) findViewById(R.id.loading);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+
         // Get status
-        ThermostatStatus status1 = new ThermostatStatus(1, 73, 1, 70, false, false, ThermostatStatus.HEATMODE);
-        status = status1;
-        setPoint = new SetPoint(0, status1.getSetPoint());
-        getState(getStatusURL);
-        changeState(status);
+        getPastState();
+        //ThermostatStatus status1 = new ThermostatStatus(1, 73, 1, 70, false, false, ThermostatStatus.HEATMODE);
+        //status = status1;
+        //setPoint = new SetPoint(0, status1.getSetPoint());
+        //getState(getStatusURL);
+        //getPastState();
+        //changeState(status);
 
         // Test status changes via UI
-        states = new ArrayList<>();
+        //states = new ArrayList<>();
 
-        ThermostatStatus status2 = new ThermostatStatus(2, 69, 1, 70, false, true, ThermostatStatus.HEATMODE);
+        /*ThermostatStatus status2 = new ThermostatStatus(2, 69, 1, 70, false, true, ThermostatStatus.HEATMODE);
         ThermostatStatus status3 = new ThermostatStatus(3, 76, 1, 75, true, false, ThermostatStatus.COOLMODE);
         ThermostatStatus status4 = new ThermostatStatus(4, 66, 1, 70, false, false, ThermostatStatus.OFFMODE);
 
         states.add(status1);
         states.add(status2);
         states.add(status3);
-        states.add(status4);
+        states.add(status4);*/
     }
 
     @Override
@@ -130,6 +173,19 @@ public class Thermostat extends AppCompatActivity {
         timer.cancel();
         timer.purge();
         b.setText("start updating");
+    }
+
+    public void initializeLayout() {
+        loading.setVisibility(View.GONE);
+        progressBar.setVisibility(View.GONE);
+
+        modeIcon.setVisibility(View.VISIBLE);
+        temperature.setVisibility(View.VISIBLE);
+        statusString.setVisibility(View.VISIBLE);
+        setTemp.setVisibility(View.VISIBLE);
+        up.setVisibility(View.VISIBLE);
+        down.setVisibility(View.VISIBLE);
+        b.setVisibility(View.VISIBLE);
     }
 
     public void chooseState(View view) {
@@ -161,12 +217,16 @@ public class Thermostat extends AppCompatActivity {
         }
     }
 
+    public void getPastState() {
+        InitRequestRunnable irr = new InitRequestRunnable();
+        irr.execute();
+    }
+
     public void getState(String url) {
         RequestRunnable rr = new RequestRunnable(url, RequestRunnable.GET);
         rr.execute();
     }
 
-// TODO: get last setpoint from server upon login
     public void changeState(ThermostatStatus status) {
 //        Current temp
         temperature = (TextView) findViewById(R.id.current_temp);
@@ -174,10 +234,35 @@ public class Thermostat extends AppCompatActivity {
 
 //        Set temp
         setTemp = (TextView) findViewById(R.id.set_temp_value);
-        setTemp.setText(setPoint.getTemperature() + "");
+        //setTemp.setText(setPoint.getTemperature() + "");
+        setTemp.setText(status.getSetPoint() + "");
 
 //        Status of HVAC
-        statusString = (TextView) findViewById(R.id.status_string);
+//        setStatusStringColor();
+
+//        Enabled?
+        modeIcon = (ImageView) findViewById(R.id.mode);
+        switch (status.getMode()) {
+            case ThermostatStatus.HEATMODE:
+                disableText(false);
+                setStatusStringColor();
+                modeIcon.setImageDrawable(getDrawable(R.drawable.flame));
+                break;
+            case ThermostatStatus.COOLMODE:
+                disableText(false);
+                setStatusStringColor();
+                modeIcon.setImageDrawable(getDrawable(R.drawable.snowflake));
+                break;
+            case ThermostatStatus.OFFMODE:
+                modeIcon.setImageDrawable(null);
+                TextView offStatus = (TextView) findViewById(R.id.status_string);
+                offStatus.setText("OFF");
+                disableText(true);
+                break;
+        }
+    }
+
+    private void setStatusStringColor() {
         if (status.isCoolOn()) {
             statusString.setText(ThermostatStatus.COOLING);
             statusString.setTextColor(getResources().getColor(R.color.cool));
@@ -191,44 +276,17 @@ public class Thermostat extends AppCompatActivity {
             statusString.setTextColor(getResources().getColor(R.color.colorSecondaryText));
             Log.d("HOLDING", "holding");
         }
-
-//        Enabled?
-        modeIcon = (ImageView) findViewById(R.id.mode);
-        switch (status.getMode()) {
-            case ThermostatStatus.HEATMODE:
-                disableText(false);
-                modeIcon.setImageDrawable(getDrawable(R.drawable.flame));
-                break;
-            case ThermostatStatus.COOLMODE:
-                disableText(false);
-                modeIcon.setImageDrawable(getDrawable(R.drawable.snowflake));
-                break;
-            case ThermostatStatus.OFFMODE:
-                modeIcon.setImageDrawable(null);
-                TextView offStatus = (TextView) findViewById(R.id.status_string);
-                offStatus.setText("OFF");
-                disableText(true);
-                break;
-        }
     }
 
     private void disableText(boolean disable) {
-
-        TextView t;
         if (disable) {
-            t = (TextView) findViewById(R.id.current_temp);
-            t.setTextColor(getResources().getColor(R.color.colorDisabledText));
-            t = (TextView) findViewById(R.id.status_string);
-            t.setTextColor(getResources().getColor(R.color.colorPrimaryText));
-            t = (TextView) findViewById(R.id.set_temp_value);
-            t.setTextColor(getResources().getColor(R.color.colorDisabledText));
+            temperature.setTextColor(getResources().getColor(R.color.colorDisabledText));
+            statusString.setTextColor(getResources().getColor(R.color.colorPrimaryText));
+            setTemp.setTextColor(getResources().getColor(R.color.colorDisabledText));
         } else {
-            t = (TextView) findViewById(R.id.current_temp);
-            t.setTextColor(getResources().getColor(R.color.colorPrimaryText));
-            t = (TextView) findViewById(R.id.status_string);
-            t.setTextColor(getResources().getColor(R.color.colorSecondaryText));
-            t = (TextView) findViewById(R.id.set_temp_value);
-            t.setTextColor(getResources().getColor(R.color.colorSecondaryText));
+            temperature.setTextColor(getResources().getColor(R.color.colorPrimaryText));
+            statusString.setTextColor(getResources().getColor(R.color.colorSecondaryText));
+            setTemp.setTextColor(getResources().getColor(R.color.colorSecondaryText));
         }
     }
 
@@ -238,16 +296,14 @@ public class Thermostat extends AppCompatActivity {
         int viewId = view.getId();
 
         if (viewId == R.id.up) {
-            setPoint.up();
+            status.up();
         } else if (viewId == R.id.down) {
-            setPoint.down();
+            status.down();
         }
-        Log.d("getTemperature", "" + setPoint.getTemperature());
+        Log.d("getTemperature", "" + status.getSetPoint());
+        setTemp.setText("" + status.getSetPoint());
 
-        TextView setPointView = (TextView) findViewById(R.id.set_temp_value);
-        setPointView.setText("" + setPoint.getTemperature());
-
-        updateServerSetTemp(timeId, setPoint.getTemperature());
+        updateServerSetTemp(timeId, status.getSetPoint());
     }
 
     public void updateServerSetTemp(long id, int temp) {
@@ -255,7 +311,6 @@ public class Thermostat extends AppCompatActivity {
         JSONObject manualUpdate = new JSONObject();
         manualUpdate.put("Id", "" + id);
         manualUpdate.put("setTemp", "" + temp);
-//        Log.d("JSON", manualUpdate.toString());
 
         RequestRunnable rr = new RequestRunnable(setTempURL, manualUpdate, RequestRunnable.POST);
         rr.execute();
@@ -268,18 +323,22 @@ public class Thermostat extends AppCompatActivity {
 //        TODO: fix default
         int modeId = ThermostatStatus.HEATMODE;
 
-        switch (status.getMode()) {
-            case ThermostatStatus.COOLMODE:
-                modeId = R.id.mode_cool;
-                break;
-            case ThermostatStatus.HEATMODE:
-                modeId = R.id.mode_heat;
-                break;
-            case ThermostatStatus.OFFMODE:
-                modeId = R.id.mode_off;
-                break;
+        try {
+            switch (status.getMode()) {
+                case ThermostatStatus.COOLMODE:
+                    modeId = R.id.mode_cool;
+                    break;
+                case ThermostatStatus.HEATMODE:
+                    modeId = R.id.mode_heat;
+                    break;
+                case ThermostatStatus.OFFMODE:
+                    modeId = R.id.mode_off;
+                    break;
+            }
+            menu.findItem(modeId).setChecked(true);
+        } catch (NullPointerException e) {
+            return false;
         }
-        menu.findItem(modeId).setChecked(true);
         return true;
     }
 
