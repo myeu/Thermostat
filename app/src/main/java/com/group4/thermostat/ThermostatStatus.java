@@ -2,10 +2,19 @@ package com.group4.thermostat;
 
 import android.util.Log;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
 /**
- * Created by marisayeung on 2/29/16.
+ * Created by marisayeung
+ *
+ *      Holds all the state for the thermostat
+ *          Gets updated on change, not replaced
  */
 public class ThermostatStatus {
     private int id;
@@ -15,6 +24,7 @@ public class ThermostatStatus {
     private boolean heatOn;
     private boolean coolOn;
     private int mode;
+    private List<ScheduleItem> schedule;
 
     static final String HEATING = "HEATING";
     static final String COOLING = "COOLING";
@@ -34,6 +44,7 @@ public class ThermostatStatus {
         this.heatOn = heatOn;
         this.coolOn = coolOn;
         this.mode = mode;
+
         lastReceivedId = 0;
     }
 
@@ -49,11 +60,14 @@ public class ThermostatStatus {
 //      "mode":"2",
 //      "Id":"1457511426899",
 //      "status":"ok",
+//      "schedules":[{"hour":6,"setTemp":70,"day":1},
+//                  ... ]
 //      "setTemp":"70"
 //     }
     private void updateAppData(JSONObject appData) {
         this.mode = Integer.parseInt(appData.get("mode").toString());
         this.setPoint = Integer.parseInt(appData.get("setTemp").toString());
+        this.schedule = parseSchedule((JSONArray) appData.get("schedules"));
      }
 
     public int getId() {
@@ -124,6 +138,34 @@ public class ThermostatStatus {
 
     public void down() {
         setPoint -= 1;
+    }
+
+    public void setPointTo(int setPoint) {
+        this.setPoint = setPoint;
+    }
+
+//    [
+//      {"hour":6,"setTemp":70,"day":1}
+//    ]
+    private List<ScheduleItem> parseSchedule(JSONArray schedule) {
+        List<ScheduleItem> newSchedule = new ArrayList<>();
+        Iterator i = schedule.iterator();
+
+        while (i.hasNext()) {
+            JSONObject jsonSchedule = (JSONObject) i.next();
+
+            ScheduleItem s = new ScheduleItem(
+                    Integer.parseInt(jsonSchedule.get("day").toString()),
+                    Integer.parseInt(jsonSchedule.get("hour").toString()),
+                    Integer.parseInt(jsonSchedule.get("setTemp").toString()));
+            newSchedule.add(s);
+        }
+        Collections.sort(newSchedule);
+        return newSchedule;
+    }
+
+    public List<ScheduleItem> getSchedule() {
+        return schedule;
     }
 }
 

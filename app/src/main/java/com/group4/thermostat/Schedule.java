@@ -18,6 +18,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/*
+ *  created by marisayeung
+ *
+ *      Show the schedule with tabs for each day
+ */
+
 public class Schedule extends AppCompatActivity {
 
     private final static String[] days = new String[]{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};

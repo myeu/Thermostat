@@ -1,6 +1,6 @@
 package com.group4.thermostat;
 
-import android.util.Log;
+//import android.util.Log;
 
 import java.net.URL;
 import java.net.HttpURLConnection;
@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -59,7 +60,7 @@ public class Request {
         HttpURLConnection connection = getConnection(endPointURL, "GET");
 
         if(connection == null) {
-            Log.d("GET", "Connection is null");
+//            Log.d("GET", "Connection is null");
             // check endPointURL
             return null;
         }
@@ -78,7 +79,7 @@ public class Request {
             return getJSONObject(sb.toString());
 
         } catch(Exception e) {
-            Log.d("GET", "IOException");
+//            Log.d("GET", "IOException");
             e.printStackTrace();
             return null;
         }
@@ -169,35 +170,75 @@ public class Request {
         // urlString is the server endpoint. i have configured the
         // server to receive both get and post requests at the same
         // url.
-        String urlString = "http://52.37.144.142:9000/application";
+        String urlString = "http://52.37.144.142:9000/createSchedule";
         // the urlString for the app is "http://52.37.144.142:9000/application"
-        JSONObject obj = r.getRequest(urlString);
+//        JSONObject obj = r.getRequest(urlString);
 
-        if(obj == null) {
-            // ERROR
-            // something is wrong with the json. this could be that
-            // the request was made to an invalid url (check by opening
-            // the url in a web browser) or that the json is malformed
-            // (my bad)
-            return;
-        } else {
-            System.out.println(obj.toString());
+        ArrayList<ScheduleItem> schedule = new ArrayList<>();
+
+        schedule.add(new ScheduleItem(ScheduleItem.MONDAY, 6, 70));
+        schedule.add(new ScheduleItem(ScheduleItem.MONDAY, 10, 65));
+        schedule.add(new ScheduleItem(ScheduleItem.MONDAY, 22, 65));
+        schedule.add(new ScheduleItem(ScheduleItem.TUESDAY, 6, 70));
+        schedule.add(new ScheduleItem(ScheduleItem.TUESDAY, 10, 65));
+        schedule.add(new ScheduleItem(ScheduleItem.TUESDAY, 17, 70));
+        schedule.add(new ScheduleItem(ScheduleItem.TUESDAY, 22, 65));
+        schedule.add(new ScheduleItem(ScheduleItem.WEDNESDAY, 6, 70));
+        schedule.add(new ScheduleItem(ScheduleItem.WEDNESDAY, 10, 65));
+        schedule.add(new ScheduleItem(ScheduleItem.WEDNESDAY, 17, 70));
+        schedule.add(new ScheduleItem(ScheduleItem.WEDNESDAY, 22, 65));
+        schedule.add(new ScheduleItem(ScheduleItem.THURSDAY, 6, 70));
+        schedule.add(new ScheduleItem(ScheduleItem.THURSDAY, 10, 65));
+        schedule.add(new ScheduleItem(ScheduleItem.THURSDAY, 17, 70));
+        schedule.add(new ScheduleItem(ScheduleItem.THURSDAY, 22, 65));
+        schedule.add(new ScheduleItem(ScheduleItem.FRIDAY, 6, 70));
+        schedule.add(new ScheduleItem(ScheduleItem.FRIDAY, 10, 65));
+        schedule.add(new ScheduleItem(ScheduleItem.FRIDAY, 17, 70));
+        schedule.add(new ScheduleItem(ScheduleItem.FRIDAY, 22, 65));
+        schedule.add(new ScheduleItem(ScheduleItem.SATURDAY, 6, 70));
+        schedule.add(new ScheduleItem(ScheduleItem.SATURDAY, 22, 65));
+        schedule.add(new ScheduleItem(ScheduleItem.SUNDAY, 6, 70));
+        schedule.add(new ScheduleItem(ScheduleItem.SUNDAY, 22, 65));
+
+        for (ScheduleItem s : schedule) {
+            JSONObject postItem = new JSONObject();
+            postItem.put("day", s.getDay());
+            postItem.put("hour", s.getHour());
+            postItem.put("setTemp", s.getTemp());
+            postItem.put("Id", System.currentTimeMillis());
+            JSONObject posted = r.postRequest(urlString, postItem);
+            if(posted != null) {
+                System.out.println(posted.toString());
+            } else {
+                System.out.println("Could not post");
+            }
         }
+
+//        if(obj == null) {
+//            // ERROR
+//            // something is wrong with the json. this could be that
+//            // the request was made to an invalid url (check by opening
+//            // the url in a web browser) or that the json is malformed
+//            // (my bad)
+//            return;
+//        } else {
+//            System.out.println(obj.toString());
+//        }
 
         // following is just an example json object. when complete, you
         // should just be able to call a function to generate a JSONObject
         // from a Java object.
-        JSONObject send = new JSONObject();
-        send.put("val1", "test");
-        send.put("val2", "string");
+//        JSONObject send = new JSONObject();
+//        send.put("val1", "test");
+//        send.put("val2", "string");
 
-        JSONObject posted = r.postRequest(urlString, send);
-        // you can see what is posted by performing a GET on the opposite
-        // endpoint (i.e. if posted to /thermostat, the object can be
-        // retrieved via GET request from /application)
-        if(posted != null) {
-            System.out.println(posted.toString());
-        }
+//        JSONObject posted = r.postRequest(urlString, send);
+//        // you can see what is posted by performing a GET on the opposite
+//        // endpoint (i.e. if posted to /thermostat, the object can be
+//        // retrieved via GET request from /application)
+//        if(posted != null) {
+//            System.out.println(posted.toString());
+//        }
     }
 }
 
